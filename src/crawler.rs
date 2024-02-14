@@ -351,9 +351,8 @@ impl Crawler {
     }
 }
 
-// Private methods
 impl Crawler {
-    async fn get_all_signatures_for_id(&self) -> Result<Vec<Signature>, CrawlError> {
+    pub async fn get_all_signatures_for_id(&self) -> Result<Vec<Signature>, CrawlError> {
         let mut signatures = Vec::new();
 
         // Initial config
@@ -416,7 +415,7 @@ impl Crawler {
         Ok(signatures)
     }
 
-    async fn get_transactions_from_signatures(
+    pub async fn get_transactions_from_signatures(
         &self,
         signatures: Vec<Signature>,
     ) -> Result<Vec<EncodedConfirmedTransactionWithStatusMeta>, CrawlError> {
