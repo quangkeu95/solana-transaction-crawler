@@ -12,7 +12,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tokio::sync::Semaphore;
-use tracing::trace;
+use tracing::{event, trace, Level};
 
 use crate::{constants::*, errors::CrawlError, filters::*};
 
@@ -361,6 +361,7 @@ impl Crawler {
         let limit = Some(1000);
         let commitment = Some(CommitmentConfig::finalized());
         let mut retries = 0u8;
+        let mut txs_count = 0;
 
         loop {
             let config = GetConfirmedSignaturesForAddress2Config {
@@ -381,9 +382,18 @@ impl Crawler {
                 None => break,
             };
 
+            let last_slot = last_sig.slot;
             let last_sig = Signature::from_str(&last_sig.signature)
                 .map_err(|err| CrawlError::SignatureParseFailed(err.to_string()))?;
 
+            txs_count += sigs.len();
+
+            event!(
+                Level::DEBUG,
+                last_slot = last_slot,
+                txs_count = txs_count,
+                "fetching signatures..."
+            );
             // Loop until we reach the last batch of signatures.
             match sigs.len() {
                 1000 => {
