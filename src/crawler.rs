@@ -12,6 +12,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tokio::sync::Semaphore;
+use tracing::trace;
 
 use crate::{constants::*, errors::CrawlError, filters::*};
 
@@ -420,7 +421,7 @@ impl Crawler {
         signatures: Vec<Signature>,
     ) -> Result<Vec<EncodedConfirmedTransactionWithStatusMeta>, CrawlError> {
         let mut transactions = Vec::new();
-        let mut errors = Vec::new();
+        // let mut errors = Vec::new();
 
         let mut tx_tasks = Vec::new();
 
@@ -442,11 +443,12 @@ impl Crawler {
             if let Ok(tx) = res {
                 transactions.push(tx);
             } else {
-                errors.push(res.unwrap_err());
+                // errors.push(res.unwrap_err());
+                let err = res.unwrap_err();
+                trace!("error: {:#?}", err);
+                return Err(err);
             }
         }
-
-        // TODO: add logging for errors
 
         Ok(transactions)
     }
